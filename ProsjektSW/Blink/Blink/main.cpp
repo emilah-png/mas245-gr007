@@ -15,11 +15,15 @@
 int main(void)
 {
 	DDRB = (1 << PB1);
-	PORTB &= ~(1 <<PB1);
 	
-    /* Replace with your application code */
     while (1) 
     {
+		PORTB |= (1 << PB1);
+		_delay_ms(1000);
+		
+		PORTB &= ~(1 << PB1);
+		_delay_ms(1000);
+		
     }
 }
 
