@@ -111,21 +111,21 @@ void setup() {
     }
   }
 
-  display.clearDisplay();
-  display.display();
-  delay(2000);
+  // display.clearDisplay();
+  // display.display();
+  // delay(2000);
   
 
-  drawSplash();
-  delay(2000);
-  display.invertDisplay(true);
-  delay(500);
-  display.invertDisplay(false);
-  delay(1000);
-  display.invertDisplay(true);
-  delay(100);
-  display.invertDisplay(false);
-  delay(1000);
+  // drawSplash();
+  // delay(2000);
+  // display.invertDisplay(true);
+  // delay(500);
+  // display.invertDisplay(false);
+  // delay(1000);
+  // display.invertDisplay(true);
+  // delay(100);
+  // display.invertDisplay(false);
+  // delay(1000);
 
   Serial.print(F("float size in bytes: "));
   Serial.println(sizeof(float));
@@ -135,33 +135,37 @@ void setup() {
 
 
 void loop() {
+  if (can0.read(msg)) {
+    can0.write(msg);
+  }
   readCan();  // Continuously check for incoming CAN messages
-
+  sendCan();
+  
   // Your other logic, e.g., sending CAN messages or handling display updates
   demoMessage();  // Example function from your existing code
-  delay(1000);    // Adjust this delay as needed
+  delay(10);    // Adjust this delay as needed
 
   Serial.print("Data byte: ");
   Serial.println((uint8_t)msg.buf[1]);  // Cast to uint8_t to ensure unsigned interpretation
 
-  for (int16_t x = 0; x < 128; ++x)
+  //for (int16_t x = 0; x < 128; ++x)
   {
     //display.drawPixel(x, 40 + (int16_t)(5.0 * std::sin(0.5 * x)), 1);
-    if (x > 0)
+   // if (x > 0)
     {
-      display.drawLine(x-1, 50 + (int16_t)(100.0 * std::sin(0.5 * (x-1))), x, 50 + (int16_t)(0.25 * std::sin(0.5 * x)), 1);
+      //display.drawLine(x-1, 50 + (int16_t)(5.0 * std::sin(0.5 * (x-1))), x, 50 + (int16_t)(0.25 * std::sin(0.5 * x)), 1);
     }
     //display.drawPixel(x, 59 + (int16_t)(5.0 * std::sin(0.5 * x)), 1);
 
-    display.display();
-    delay(100);
+   // display.display();
+   // delay(100);
 
-    sendCan();
+   // sendCan();
 
-    Message message;
-    message.sequenceNumber = static_cast<uint8_t>(x);
-    message.temperature = 23.10 * std::sin(x);
-    sendCan(message);
+   // Message message;
+   // message.sequenceNumber = static_cast<uint8_t>(x);
+    //message.temperature = 23.10 * std::sin(x);
+   // sendCan(message);
   }
   
 }
@@ -170,39 +174,38 @@ void loop() {
 
 void sendCan()
 {
-  msg.len = 3;
+  msg.len = 7;
   msg.id = 0x007;
-  msg.buf[0] = 0x26;
-  msg.buf[1] = 0x42;
-  msg.buf[2] = 0x00;
   can0.write(msg);
-
-  //msg.buf[2] = 0x01;
-  //Can1.write(msg);
 }
 
 
 
-void sendCan(const Message& message) {
-    // Create a CAN message object (assuming CanMsg is a type you have defined)
-    CAN_message_t msg;
+// void sendCan(const Message& message) {
+//     // Create a CAN message object (assuming CanMsg is a type you have defined)
+//     CAN_message_t msg;
 
-    // Set the CAN message ID and length
-    msg.id = 0x245;
-    msg.len = 1 + sizeof(float);  // Will not work with double, as double on this platform is size 8, and msg.buf maximum size is 8.
+//     // Set the CAN message ID and length
+//     msg.id = 0x245;
+//     msg.len = 1 + sizeof(float);  // Will not work with double, as double on this platform is size 8, and msg.buf maximum size is 8.
 
-    // Serialize the uint8_t field directly into the first byte of the buffer
-    msg.buf[0] = message.sequenceNumber;
+//     // Serialize the uint8_t field directly into the first byte of the buffer
+//     msg.buf[0] = message.sequenceNumber;
 
-    // Serialize the float field into the remaining bytes of the buffer. Asume same endianness for all platforms.
-    memcpy(&msg.buf[1], &message.temperature, sizeof(float));
+//     // Serialize the float field into the remaining bytes of the buffer. Asume same endianness for all platforms.
+//     memcpy(&msg.buf[1], &message.temperature, sizeof(float));
 
-    // Send the CAN message
-    if (can0.write(msg) < 0)
-    {
-      Serial.println("CAN send failed.");
-    }
-}
+//     // Send the CAN message
+//     if (can0.write(msg) > 0) {
+//       Serial.print("Message sent successfully");
+//       Serial.print(" | Message:");
+//       Serial.println(can0.write(msg));
+//     } else {
+//       int errorCode = can0.write(msg);
+//       Serial.print("CAN send failed with error code: ");
+//       Serial.println(errorCode);
+//     }
+// }
 
 void demoMessage(void) {
   display.clearDisplay();
@@ -211,18 +214,18 @@ void demoMessage(void) {
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(0, 0);
   display.println(F("Hello world!"));
-  delay(500);
+  delay(10);
   display.println(F("MAS245 demo"));
   display.println("");
 
-  const __FlashStringHelper* message = F("using platformio...");
-  const char* mp = (const char*)message;
-  int len = strlen(mp);
-  for(int i = 0; i < len; i++) {
-      display.print(mp[i]);
-      display.display();
-      delay(100);  // Adjust this delay to speed up or slow down the "typewriter" effect
-  }
+  // const __FlashStringHelper* message = F("using platformio...");
+  // const char* mp = (const char*)message;
+  // int len = strlen(mp);
+  // for(int i = 0; i < len; i++) {
+  //     display.print(mp[i]);
+  //     display.display();
+  //     //delay(10);  // Adjust this delay to speed up or slow down the "typewriter" effect
+  // }
   display.println();  // Move to the next line after the message is printed
   display.display();
 }
@@ -240,13 +243,16 @@ void readCan() {
   if (can0.read(msg)) {  // Check if a message is available and read it
     Serial.print("Received CAN message with ID: 0x");
     Serial.println(msg.id, HEX);
-
+    int j = 0;
     // Print the data bytes of the message
     Serial.print("Data: ");
     for (int i = 0; i < msg.len; i++) {
       Serial.print(msg.buf[i], HEX);
       Serial.print(" ");
+      j = i;
     }
+    Serial.print(" | i = ");
+    Serial.print(j);
     Serial.println();
     
     // Optionally, process the message data here
