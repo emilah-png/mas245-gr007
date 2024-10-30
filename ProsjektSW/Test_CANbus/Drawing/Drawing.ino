@@ -1,14 +1,14 @@
 // Written by K. M. Knausgård 2023-10-21
 
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
-#include <Arduino.h>
-#include <FlexCAN_T4.h>
-#include <SPI.h>
-#include <Wire.h>
-#include <string.h>
+# include <Adafruit_GFX.h>
+# include <Adafruit_SSD1306.h>
+# include <Arduino.h>
+# include <FlexCAN_T4.h>
+# include <SPI.h>
+# include <Wire.h>
+# include <string.h>
 
-#include "mas245_logo_bitmap.h"
+# include "mas245_logo_bitmap.h"
 
 # define SCREEN_WIDTH 128
 # define SCREEN_HEIGHT 64
@@ -48,17 +48,34 @@ namespace {
                             carrier::pin::oledCs);
 }
 
+int textx = 3;
 void setup() {
+  display.clearDisplay();
   Serial.begin(9600);
-  int textx = 3;
+  can0.begin();
+  can0.setBaudRate(250000); 
+}
 
+
+int motattMeldinger = 0;
+void loop() {
+  
+  if (can0.read(msg)) {
+    can0.write(msg);
+  }
+  readCan();  // Continuously check for incoming CAN messages
+  sendCan();
+
+/*--------------------------------------------------------------------------------------------------------------------------------------------
+                                                              Display settings
+----------------------------------------------------------------------------------------------------------------------------------------------*/
   if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)){
     Serial.println(F("SSD1306 allocation failed"));
     for(;;);
   }
-
+  delay(500);
   display.clearDisplay();
-
+  
   int x = 0;
   int y = 0;
 
@@ -95,29 +112,64 @@ void setup() {
     display.drawPixel(i + 1, 30, SSD1306_WHITE);
   }
 
-  // Display statistics content
-  display.setCursor(textx, 33);
-  display.print("Antall mottatt: 31");
-
-  display.setCursor(textx, 41);
-  display.print("Mottok sist ID: 34");
-
   // Second dashed line
   for (int i = 1; i < 128; i += 3) {
     display.drawPixel(i, 51, SSD1306_WHITE);
     display.drawPixel(i + 1, 51, SSD1306_WHITE);
   }
 
+
+
+  // Display statistics content
+  display.setCursor(textx, 33);
+  // // Clear previous number by drawing a black rectangle over it
+  // display.fillRect(textx, 33, 20, 8, SSD1306_BLACK); // Adjust size and position as needed
+  display.print("Antall mottatt: ");
+  display.print(motattMeldinger); // Antall medlinger via CANbus
+
+  display.setCursor(textx, 41);
+  display.print("Mottok sist ID: ");
+  display.print(msg.id); // ID via CANbus
+
+
+
   // Display IMU measurement
   display.setCursor(textx, 54);
-  display.print("IMU z:  9.81m/s^2");
+  display.print("IMU z:  ");
+  display.print(1); // IMU z via CANbus
+  display.print(" m/s^2");
+
+  motattMeldinger++;
 
   display.display();
+
 }
 
+void sendCan()
+{
+  msg.len = 7;
+  msg.id = 0x007;
+  can0.write(msg);
+}
 
+void readCan() {
+  if (can0.read(msg)) {  // Check if a message is available and read it
+    Serial.print("Received CAN message with ID: 0x");
+    Serial.println(msg.id, HEX);
 
-void loop() {
-
+    // Print the data bytes of the message
+    Serial.print("Data: ");
+    for (int i = 0; i < msg.len; i++) {
+      Serial.print(msg.buf[i], HEX);
+      Serial.print(" ");
+    }
+    Serial.println();
+    
+    // Optionally, process the message data here
+    // For example, you can store specific message IDs and data for further use
+  } else {
+    // No message available to read
+  }
+  
 }
 
