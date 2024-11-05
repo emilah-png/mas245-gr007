@@ -11,79 +11,91 @@
 #include "mas245_logo_bitmap.h"
 
 
-namespace carrier
-{
-  namespace pin
-  {
-    constexpr uint8_t joyLeft{18};
-    constexpr uint8_t joyRight{17};
-    constexpr uint8_t joyClick{19};
-    constexpr uint8_t joyUp{22};
-    constexpr uint8_t joyDown{23};
+namespace carrier {
+namespace pin {
+constexpr uint8_t joyLeft{ 18 };
+constexpr uint8_t joyRight{ 17 };
+constexpr uint8_t joyClick{ 19 };
+constexpr uint8_t joyUp{ 22 };
+constexpr uint8_t joyDown{ 23 };
 
-    constexpr uint8_t oledDcPower{6};
-    constexpr uint8_t oledCs{10};
-    constexpr uint8_t oledReset{5};
-  }
+constexpr uint8_t oledDcPower{ 6 };
+constexpr uint8_t oledCs{ 10 };
+constexpr uint8_t oledReset{ 5 };
+}
 
-  namespace oled
-  {
-    constexpr uint8_t screenWidth{128}; // OLED display width in pixels
-    constexpr uint8_t screenHeight{64}; // OLED display height in pixels
-  }
+namespace oled {
+constexpr uint8_t screenWidth{ 128 };  // OLED display width in pixels
+constexpr uint8_t screenHeight{ 64 };  // OLED display height in pixels
+}
 }
 
 
-namespace images
-{
-  namespace pumpkin 
-  {
-    constexpr uint8_t width{16};
-    constexpr uint8_t height{18};
+namespace images {
+namespace pumpkin {
+constexpr uint8_t width{ 16 };
+constexpr uint8_t height{ 18 };
 
-    constexpr static uint8_t PROGMEM bitmap[] =
-    {
-      0b00000000, 0b00100000,
-      0b00000000, 0b11100000,
-      0b00000001, 0b10000000,
-      0b00000001, 0b10000000,
-      0b00000001, 0b10000000,
-      0b00000011, 0b11100000,
-      0b00001111, 0b11111000,
-      0b00111111, 0b11111000,
-      0b01111111, 0b11111110,
-      0b01111111, 0b11111110,
-      0b11111111, 0b11111111,
-      0b11111111, 0b11111111,
-      0b11111111, 0b11111111,
-      0b01111111, 0b11111110,
-      0b01111111, 0b11111110,
-      0b00011111, 0b11111000,
-      0b00011111, 0b11110000,
-      0b00000111, 0b11100000,
-    };
-  };
+constexpr static uint8_t PROGMEM bitmap[] = {
+  0b00000000,
+  0b00100000,
+  0b00000000,
+  0b11100000,
+  0b00000001,
+  0b10000000,
+  0b00000001,
+  0b10000000,
+  0b00000001,
+  0b10000000,
+  0b00000011,
+  0b11100000,
+  0b00001111,
+  0b11111000,
+  0b00111111,
+  0b11111000,
+  0b01111111,
+  0b11111110,
+  0b01111111,
+  0b11111110,
+  0b11111111,
+  0b11111111,
+  0b11111111,
+  0b11111111,
+  0b11111111,
+  0b11111111,
+  0b01111111,
+  0b11111110,
+  0b01111111,
+  0b11111110,
+  0b00011111,
+  0b11111000,
+  0b00011111,
+  0b11110000,
+  0b00000111,
+  0b11100000,
+};
+};
 };
 
 
 namespace {
-  CAN_message_t msg;
+CAN_message_t msg;
 
-  FlexCAN_T4<CAN0, RX_SIZE_256, TX_SIZE_16> can0;
-  //FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> can1;
+FlexCAN_T4<CAN0, RX_SIZE_256, TX_SIZE_16> can0;
+//FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> can1;
 
-  Adafruit_SSD1306 display( carrier::oled::screenWidth,
-                            carrier::oled::screenHeight,
-                            &SPI,
-                            carrier::pin::oledDcPower,
-                            carrier::pin::oledReset,
-                            carrier::pin::oledCs);
+Adafruit_SSD1306 display(carrier::oled::screenWidth,
+                         carrier::oled::screenHeight,
+                         &SPI,
+                         carrier::pin::oledDcPower,
+                         carrier::pin::oledReset,
+                         carrier::pin::oledCs);
 }
 
 
 struct Message {
-    uint8_t sequenceNumber;
-    float temperature;
+  uint8_t sequenceNumber;
+  float temperature;
 };
 
 
@@ -101,12 +113,10 @@ void setup() {
   //can1.setBaudRate(250000);
 
   // Gen. display voltage from 3.3V (https://adafruit.github.io/Adafruit_SSD1306/html/_adafruit___s_s_d1306_8h.html#ad9d18b92ad68b542033c7e5ccbdcced0)
-  if( !display.begin(SSD1306_SWITCHCAPVCC) )
-  {
+  if (!display.begin(SSD1306_SWITCHCAPVCC)) {
     Serial.println(F("ERROR: display.begin(SSD1306_SWITCHCAPVCC) failed."));
 
-    for(;;)
-    {
+    for (;;) {
       // Blink angry LED pattern or something, initializing LED failed.
     }
   }
@@ -114,7 +124,7 @@ void setup() {
   // display.clearDisplay();
   // display.display();
   // delay(2000);
-  
+
 
   // drawSplash();
   // delay(2000);
@@ -140,10 +150,10 @@ void loop() {
   }
   readCan();  // Continuously check for incoming CAN messages
   sendCan();
-  
+
   // Your other logic, e.g., sending CAN messages or handling display updates
   demoMessage();  // Example function from your existing code
-  delay(10);    // Adjust this delay as needed
+  delay(10);      // Adjust this delay as needed
 
   Serial.print("Data byte: ");
   Serial.println((uint8_t)msg.buf[1]);  // Cast to uint8_t to ensure unsigned interpretation
@@ -151,29 +161,27 @@ void loop() {
   //for (int16_t x = 0; x < 128; ++x)
   {
     //display.drawPixel(x, 40 + (int16_t)(5.0 * std::sin(0.5 * x)), 1);
-   // if (x > 0)
+    // if (x > 0)
     {
       //display.drawLine(x-1, 50 + (int16_t)(5.0 * std::sin(0.5 * (x-1))), x, 50 + (int16_t)(0.25 * std::sin(0.5 * x)), 1);
     }
     //display.drawPixel(x, 59 + (int16_t)(5.0 * std::sin(0.5 * x)), 1);
 
-   // display.display();
-   // delay(100);
+    // display.display();
+    // delay(100);
 
-   // sendCan();
+    // sendCan();
 
-   // Message message;
-   // message.sequenceNumber = static_cast<uint8_t>(x);
+    // Message message;
+    // message.sequenceNumber = static_cast<uint8_t>(x);
     //message.temperature = 23.10 * std::sin(x);
-   // sendCan(message);
+    // sendCan(message);
   }
-  
 }
 
 
 
-void sendCan()
-{
+void sendCan() {
   msg.len = 7;
   msg.id = 0x007;
   can0.write(msg);
@@ -209,7 +217,7 @@ void sendCan()
 
 void demoMessage(void) {
   display.clearDisplay();
-  
+
   display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(0, 0);
@@ -218,14 +226,14 @@ void demoMessage(void) {
   display.println(F("MAS245 demo"));
   display.println("");
 
-  // const __FlashStringHelper* message = F("using platformio...");
-  // const char* mp = (const char*)message;
-  // int len = strlen(mp);
-  // for(int i = 0; i < len; i++) {
-  //     display.print(mp[i]);
-  //     display.display();
-  //     //delay(10);  // Adjust this delay to speed up or slow down the "typewriter" effect
-  // }
+  const __FlashStringHelper* message = F("using platformio...");
+  const char* mp = (const char*)message;
+  int len = strlen(mp);
+  for (int i = 0; i < len; i++) {
+    display.print(mp[i]);
+    display.display();
+    delay(10);  // Adjust this delay to speed up or slow down the "typewriter" effect
+  }
   display.println();  // Move to the next line after the message is printed
   display.display();
 }
@@ -251,14 +259,13 @@ void readCan() {
       Serial.print(" ");
       j = i;
     }
-    Serial.print(" | i = ");
+    Serial.print(" | message length = ");
     Serial.print(j);
     Serial.println();
-    
+
     // Optionally, process the message data here
     // For example, you can store specific message IDs and data for further use
   } else {
     // No message available to read
   }
 }
-
