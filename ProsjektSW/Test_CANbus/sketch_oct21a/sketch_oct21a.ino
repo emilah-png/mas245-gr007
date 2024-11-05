@@ -182,7 +182,7 @@ void loop() {
 
 
 void sendCan() {
-  msg.len = 7;
+  msg.len = 8;
   msg.id = 0x007;
   can0.write(msg);
 }
@@ -255,7 +255,7 @@ void readCan() {
     // Print the data bytes of the message
     Serial.print("Data: ");
     for (int i = 0; i < msg.len; i++) {
-      Serial.print(msg.buf[i], HEX);
+      Serial.print(msg.buf[i], DEC);
       Serial.print(" ");
       j = i;
     }
