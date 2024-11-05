@@ -139,6 +139,7 @@ void setup() {
 
   Serial.print(F("float size in bytes: "));
   Serial.println(sizeof(float));
+  sendCan();
 }
 
 
@@ -149,7 +150,7 @@ void loop() {
     can0.write(msg);
   }
   readCan();  // Continuously check for incoming CAN messages
-  sendCan();
+  
 
   // Your other logic, e.g., sending CAN messages or handling display updates
   demoMessage();  // Example function from your existing code
