@@ -343,7 +343,7 @@ void readCan() {
     }
     Serial.println();
 
-    // Optionally, process the message data here
+
     // For example, you can store specific message IDs and data for further use
   } else {
     // No message available to read
